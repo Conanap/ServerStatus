@@ -7,6 +7,7 @@ const https = require('https');
 const key = fs.readFileSync('./ssl/private/selfsigned.key', 'utf8');
 const cert = fs.readFileSync('./ssl/certs/selfsigned.crt', 'utf8');
 const cred = { key: key, cert: cert };
+const cookie = require('cookie');
 
 const httpPort = 80;
 const httpsPort = 443;
@@ -43,7 +44,7 @@ app.use(session({ secret: 'clRqtAIhXidnMk4Cz6j7',
 
 // for logging
 app.use(function(req, res, next) {
-    // console.log("HTTP request");
+    // console.log(req.method, req.body);
     next();
 });
 
@@ -75,12 +76,14 @@ app.get('/logout', function(req, res, next) {
 });
 
 // server announcement
-app.patch('/pa/:time/', function(req, res, next) {
-    if(!req.username) return res.status(401).end("Access denied");
+app.patch('/pa', function(req, res, next) {
+    let username = req.body.username;
+    let password = req.body.password;
+    // if(!req.username) return res.status(401).end("Access denied");
+    if(!(username === 'conanap' && password === 'Z7ajGyz87dA0jddIzvoy')) return res.status(401).end("Access denied");
 
-    let time = Date.parse(req.params.time);
-    let currTime = new Date();
-    currTime = currTime.getMilliseconds();
+    let time = Date.parse(req.body.time);
+    let currTime = Date.now();
     if(!time || time < currTime) return res.status(400).end('Invalid time; use structure "yyyy-mm-ttThh:mm:ssZ", where T and Z are literals.');
 
     let text = req.body.text;
@@ -92,10 +95,10 @@ app.patch('/pa/:time/', function(req, res, next) {
         expiry: time
     };
 
-    res.status(200);
     setTimeout(function() {
         delete msgs[cid];
     }, time - currTime);
+    return res.status(200).end("PA successfully posted");
 });
 
 app.get('/pa', function(req, res, next) {

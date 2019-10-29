@@ -29,5 +29,11 @@ let api = (function() {
         });
     };
 
+    module.getPA = function(listener) {
+        send('GET', '/pa', {}, function(err, res) {
+            listener(res, err ? true : false);
+        });
+    };
+
     return module;
 }());

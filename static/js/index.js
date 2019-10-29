@@ -75,7 +75,45 @@
         setTimeout(updatePlex, 1000);
     };
 
+    function updatePA() {
+        console.log("Checking PAs");
+        api.getPA(function(msgs, err) {
+            var ele = document.querySelector("#PA");
+
+            if(err) {
+                ele.innerHTML = 'Cannot get PAs';
+                return;
+            }
+
+            if(!Object.keys(msgs).length) {
+                ele.innerHTML = '<p id="paholder">No new server announcements</p>';
+                return;
+            }
+
+            let html = `
+            <table>
+                <tr>
+                    <th>Message</th>
+                    <th>Expiry Time</th>
+                </tr>
+            `;
+
+            // ele.innerHTML = msgs;
+            for(var msg in msgs) {
+                html += "<tr><td>" + msgs[msg]["text"] + "</td>";
+                let date = new Date(msgs[msg]["expiry"]);
+                date = date.toUTCString().slice(0, -3) + "UTC";
+                html += "<td>" + date + "</td><tr>";
+            }
+            html += "</table>";
+            ele.innerHTML = html;
+        });
+
+        setTimeout(updatePA, 1000);
+    };
+
     updateTime();
     updateMC();
     updatePlex();
+    updatePA();
 }());
