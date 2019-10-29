@@ -1,0 +1,25 @@
+.off {
+    color: red;
+}
+
+.on {
+    color: green;
+}
+
+#tableDiv {
+    text-align: center;
+}
+
+td p {
+    text-align: center;
+}
+
+table {
+    margin: 0;
+    padding: 0;
+    table-layout: fixed;
+}
+
+#curTime {
+    text-align: center;
+}
