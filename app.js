@@ -14,6 +14,15 @@ const httpsPort = 443;
 const app = express();
 const redir = express();
 
+// pa msgs
+/* msg = {
+    text: String,
+    expiry: Int
+}
+*/
+let msgs = {};
+let id = 0;
+
 redir.use(function(req, res, next) {
     res.writeHead(301, { "Location": "https://conanap.ddns.net" });
     res.end();
@@ -27,17 +36,10 @@ const exec = require('child_process').exec;
 app.use(express.static('static'));
 
 // sessions and security stuff
-// app.use(session({ secret: '',
-//     resave: false,
-//     saveUninitialized: true 
-// }));
-
-app.get('/login', function(req, res, next) {
-    if(!req.query.username || !req.query.password) {
-       return res.writeHead(400, "Did not provide credentials");
-        return res.send("Did not provide credentials");
-    }
-});
+app.use(session({ secret: 'clRqtAIhXidnMk4Cz6j7',
+    resave: false,
+    saveUninitialized: true 
+}));
 
 // for logging
 app.use(function(req, res, next) {
@@ -45,6 +47,62 @@ app.use(function(req, res, next) {
     next();
 });
 
+// login and stuff
+app.post('/login', function(req, res, next) {
+    if(!req.body.username || !req.body.password) return res.status(400).end("Did not provide credentials");
+    let username = req.body.username;
+    let password = req.body.password;
+
+    if(username === 'conanap' && password === 'Z7ajGyz87dA0jddIzvoy') {
+        req.session.user = 'conanap';
+        res.setHeader('Set-Cookie', cookie.serialize({
+            path: '/',
+            maxAge: 60 * 2
+        }));
+        return res.json('User conanap signed in');
+    }
+
+    return res.status(401).end("Access denied");
+});
+
+app.get('/logout', function(req, res, next) {
+    req.session.destroy();
+    req.username = '';
+    res.setHeader('Set-Cookie', cookie.serialize({
+        path: '/',
+        maxAge: 60 * 2
+    }));
+});
+
+// server announcement
+app.patch('/pa/:time/', function(req, res, next) {
+    if(!req.username) return res.status(401).end("Access denied");
+
+    let time = Date.parse(req.params.time);
+    let currTime = new Date();
+    currTime = currTime.getMilliseconds();
+    if(!time || time < currTime) return res.status(400).end('Invalid time; use structure "yyyy-mm-ttThh:mm:ssZ", where T and Z are literals.');
+
+    let text = req.body.text;
+    if(!text) return res.status(400).end('Invalid message');
+
+    let cid = id++;
+    msgs[cid] = {
+        text: text,
+        expiry: time
+    };
+
+    res.status(200);
+    setTimeout(function() {
+        delete msgs[cid];
+    }, time - currTime);
+});
+
+app.get('/pa', function(req, res, next) {
+    return res.json(msgs);
+});
+
+// useful shit
 app.get('/statuses', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
         if(err) { console.log(err); console.log(stderr); return err; }
