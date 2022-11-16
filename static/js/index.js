@@ -1,3 +1,6 @@
+// TODO: move these consts elsewhere so we can
+// import into html
+const DELAY = 10000;
 (function() {
     "use strict";
 
@@ -30,7 +33,7 @@
         let date = new Date();
         let retStr = "Server statuses as of<br>" + date.getDate() + " " + months[date.getMonth()] + ", " + date.getFullYear() + " at " + nums(date.getHours()) + ":" + nums(date.getMinutes()) + ":" + nums(date.getSeconds()) + " EST<br>";
         retStr += date.getUTCDate() + " " + months[date.getUTCMonth()] + ", " + date.getUTCFullYear() + " at " + nums(date.getUTCHours()) + ":" + nums(date.getUTCMinutes()) + ":" + nums(date.getUTCSeconds()) + " UTC<br>";
-        retStr += "Server statuses are updated live every 1 second.";
+        retStr += "Server statuses are updated live every 10 second.";
 
         document.querySelector('#curTime').innerHTML = retStr;
         setTimeout(updateTime, 1000);
@@ -54,7 +57,7 @@
                 ele.className = 'off';
 
         });
-        setTimeout(updateMC, 1000);
+        setTimeout(updateMC, DELAY);
     };
 
     function updatePlex() {
@@ -74,7 +77,7 @@
                 ele.className = 'off';
 
         });
-        setTimeout(updatePlex, 1000);
+        setTimeout(updatePlex, DELAY);
     };
 
     function updatePA() {
@@ -111,32 +114,22 @@
             ele.innerHTML = html;
         });
 
-        setTimeout(updatePA, 1000);
+        setTimeout(updatePA, DELAY);
     };
 
     function updatePublicIP() {
         console.log("Updating public IP");
+        api.getLocIP(function(msgs, err) {
+            if(err) {
+                document.querySelector('#pubIP').innerHTML = '<p>Cannot get server IP</p>';
+                return;
+            }
 
-        if (!publicIP) {
-            document.querySelector('#pubIP').innerHTML = '<p>' + 'msgs.ip' + '</p>';
-            api.getLocIP(function(msgs, err) {
-                if(err) {
-                    document.querySelector('#pubIP').innerHTML = '<p>Hello there</p>';
-                    return;
-                }
+            publicIP = msgs;
+            document.querySelector('#pubIP').innerHTML = '<p>' + publicIP + '</p>';
+        });
 
-                console.log(msgs);
-
-                publicIP = msgs;
-                document.querySelector('#pubIP').innerHTML = '<p>' + publicIP + '</p>';
-            });
-
-            setTimeout(updatePublicIP(), 1000);
-            return;
-        }
-
-        setTimeout(updatePublicIP(), 100000000);
-        publicIP = undefined;
+        setTimeout(updatePublicIP, DELAY);
     };
 
     updateTime();

@@ -129,8 +129,23 @@ app.get('/statuses/plex', function(req, res, next) {
 });
 
 // get public IP
-app.get('/LocIP', function(req, res, next) {
-    return res.json('142.112.163.54');
+app.get('/LocIP', async function(req, res, next) {
+    // get result from https://v4.ident.me
+    return res.json(await fetch('https://v4.ident.me',
+        	{
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+        })
+        .then((response) => {
+            if (response.ok) {
+                return response.text();
+            }
+        }).then((text) => {
+            return text;
+        }));
 });
 
 app.get('/IP', function(req, res, next) {
