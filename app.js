@@ -4,8 +4,8 @@ const fs = require('fs');
 
 const http = require('http');
 const https = require('https');
-const key = fs.readFileSync('./ssl/private/selfsigned.key', 'utf8');
-const cert = fs.readFileSync('./ssl/certs/selfsigned.crt', 'utf8');
+const key = fs.readFileSync('I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.key', 'utf8');
+const cert = fs.readFileSync('I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.crt', 'utf8');
 const cred = { key: key, cert: cert };
 const cookie = require('cookie');
 
@@ -125,6 +125,19 @@ app.get('/statuses/plex', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
         if(err) { console.log(err); console.log(stderr); return err; }
         return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
+    });
+});
+
+// get public IP
+app.get('/LocIP', function(req, res, next) {
+    return res.json('142.112.163.54');
+});
+
+app.get('/IP', function(req, res, next) {
+    send('GET', 'https://api.ipify.org?format=json', {}, function(err, res) {
+        if(err)
+            return err;
+        return res.json(res.ip);
     });
 });
 

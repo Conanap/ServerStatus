@@ -28,3 +28,9 @@ p {
 #paholder {
     font-weight: bold;
 }
+
+
+body {
+	background: black;
+	color: white;
+}

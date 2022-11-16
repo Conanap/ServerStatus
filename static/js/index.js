@@ -16,6 +16,8 @@
         11: 'Dec'
     };
 
+    let publicIP = undefined;
+
     function nums (input) {
         if(input < 10) {
             return '0' + input;
@@ -112,8 +114,34 @@
         setTimeout(updatePA, 1000);
     };
 
+    function updatePublicIP() {
+        console.log("Updating public IP");
+
+        if (!publicIP) {
+            document.querySelector('#pubIP').innerHTML = '<p>' + 'msgs.ip' + '</p>';
+            api.getLocIP(function(msgs, err) {
+                if(err) {
+                    document.querySelector('#pubIP').innerHTML = '<p>Hello there</p>';
+                    return;
+                }
+
+                console.log(msgs);
+
+                publicIP = msgs;
+                document.querySelector('#pubIP').innerHTML = '<p>' + publicIP + '</p>';
+            });
+
+            setTimeout(updatePublicIP(), 1000);
+            return;
+        }
+
+        setTimeout(updatePublicIP(), 100000000);
+        publicIP = undefined;
+    };
+
     updateTime();
     updateMC();
     updatePlex();
     updatePA();
+    updatePublicIP();
 }());

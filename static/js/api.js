@@ -35,5 +35,17 @@ let api = (function() {
         });
     };
 
+    module.getIP = function(listener) {
+        send('GET', '/IP', {}, function(err, res) {
+            listener(res, err ? true : false);
+        });
+    };
+
+    module.getLocIP = function(listener) {
+        send('GET', '/LocIP', {}, function(err, res) {
+            listener(res, err ? true : false);
+        });
+    };
+
     return module;
 }());
