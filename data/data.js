@@ -65,6 +65,15 @@ async function get_awiting_approval() {
         });
 };
 
+async function get_user_list() {
+    return db(USERDATADB)
+        .select('username', 'email', 'permission')
+        .catch((err) => {
+            console.log("Error deleting user ", ident, ": ", err);
+            return false;
+        });
+};
+
 async function login(user) {
 
     return db(USERDATADB)
@@ -118,7 +127,18 @@ async function login(user) {
 async function set_permission(username, permission_level) {
     return db(USERDATADB)
         .where({ username: username })
-        .update({ permission: permission_level })
+        .orWhere({ email: username })
+        .select('permission')
+        .then((perm) => {
+            if(perm === constants.permission.max)
+                console.log("Cannot change max permission to other permissions.");
+                throw "Cannot change max permission to other permissions.";
+            
+            return db(USERDATADB)
+            .where({ username: username })
+            .orWhere({ email: username })
+            .update({ permission: permission_level })
+        })
         .then(() => {
             console.log("Permssion level for ", username, " est to ", permission_level);
             return true;
@@ -136,4 +156,5 @@ module.exports = {
     set_permission: set_permission,
     deregister: deregister,
     get_awiting_approval: get_awiting_approval,
+    get_user_list: get_user_list,
 };

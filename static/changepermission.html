@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Conanap</title>
+    <link href="public/style/css/index.css" rel="stylesheet" type="text/css"/>
+    <link href="public/style/css/tables.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+    <header>
+        <h1>Change permissions</h1>
+    </header>
+
+    <form action="/permission-set" method="POST">
+        <fieldset>
+            <label>Username / e-mail</label><br>
+            <input type="text" name="ident" id="ident" required>
+            <br><br>
+
+            <label>Permission level</label><br>
+            <input type="number" id="permission" name="permission" required>
+
+            <br><br>
+            <a href="/">Cancel</a>
+            <button type="submit">Submit</button>
+        </fieldset>
+    </form>
+</body>
+
+</html>

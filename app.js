@@ -19,6 +19,7 @@ const cred = { key: key, cert: cert };
 
 const httpPort = 80;
 const httpsPort = 443;
+const DEBUG = false;
 
 const app = express();
 const redir = express();
@@ -50,14 +51,14 @@ app.use(session({ secret: String(crypto.randomBytes(32)),
 
 // for logging
 app.use(function(req, res, next) {
-    // console.log(req.method, req.originalUrl, req.body);
+    DEBUG && console.log(req.method, req.originalUrl, req.body);
     return next();
 });
 
 app.get('/', function (req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid) {
-        console.log("User ", loc_session.userid);
+        DEBUG && console.log("User ", loc_session.userid);
         return next();
     }
 
@@ -77,11 +78,11 @@ app.post('/user-create', function(req, res, next) {
 
     return dataStore.register(user)
         .then(() => {
-            console.log("User created: ", user);
+            DEBUG && console.log("User created: ", user);
             return res.redirect(constants.user_reqd_page);
         })
         .catch((err) => {
-            console.log("User creation error: ", err);
+            DEBUG && console.log("User creation error: ", err);
             return res.redirect(constants.failed_page);
         });
 });
@@ -92,7 +93,7 @@ app.post('/user-login', function(req, res, next) {
         password: req.body.password,
     }
 
-    console.log("Trying to login", user.ident);
+    DEBUG && console.log("Trying to login", user.ident);
     return dataStore.login(user)
     .then(function(result) {
         if(result.success) {
@@ -116,7 +117,7 @@ app.post('/user-login', function(req, res, next) {
 app.use(function(req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid) {
-        console.log("User ", loc_session.userid);
+        DEBUG && console.log("User ", loc_session.userid);
         return next();
     }
     return res.redirect(constants.denied_page);
@@ -142,14 +143,14 @@ app.get('/pa', function(req, res, next) {
 // useful shit
 app.get('/statuses', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { console.log(err); console.log(stderr); return err; }
+        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
         return res.json(stdout);
     });
 });
 
 app.get('/statuses/mc', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { console.log(err); console.log(stderr); return err; }
+        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
 
         return res.json(stdout.indexOf('java.exe') >= 0 ? "Online" : "Offline");
     });
@@ -157,7 +158,7 @@ app.get('/statuses/mc', function(req, res, next) {
 
 app.get('/statuses/plex', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { console.log(err); console.log(stderr); return err; }
+        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
         return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
     });
 });
@@ -211,8 +212,8 @@ https.createServer(cred, app).listen(httpsPort, function(err) {
 // gm
 app.use(function(req, res, next) {
     let loc_session = req.session;
-    if (loc_session.userid && loc_session.permission > constants.permission.gm) {
-        console.log("GM ", loc_session.userid);
+    if (loc_session.userid && loc_session.permission >= constants.permission.gm) {
+        DEBUG && console.log("GM ", loc_session.userid);
         return next();
     }
     return res.redirect(constants.denied_page);
@@ -244,16 +245,16 @@ app.patch('/pa', function(req, res, next) {
 // admins
 app.use(function(req, res, next) {
     let loc_session = req.session;
-    if (loc_session.userid && loc_session.permission > constants.permission.admin) {
-        console.log("Admin ", loc_session.userid);
+    if (loc_session.userid && loc_session.permission >= constants.permission.admin) {
+        DEBUG && console.log("Admin ", loc_session.userid);
         return next();
     }
     return res.redirect(constants.denied_page);
 });
 
-app.patch('/permission-set', function(req, res, next) {
+app.post('/permission-set', function(req, res, next) {
     let user = {
-        username: req.body.username,
+        username: req.body.ident,
         permission: req.body.permission,
     }
 
@@ -262,11 +263,11 @@ app.patch('/permission-set', function(req, res, next) {
 
     return dataStore.set_permission(user.username, user.permission)
         .then(() => {
-            console.log("Permission set:", user);
+            DEBUG && console.log("Permission set:", user);
             return res.redirect(constants.success_page);
         })
         .catch((err) => {
-            console.log("User creation error: ", err);
+            DEBUG && console.log("User creation error: ", err);
             return res.redirect(constants.failed_page);
         });
 });
@@ -276,11 +277,11 @@ app.get('/user-approve', function(req, res, next) {
 
     return dataStore.set_permission(user, constants.permission.min)
         .then(() => {
-            console.log("Account approved:", user);
+            DEBUG && console.log("Account approved:", user);
             return res.redirect(constants.success_page);
         })
         .catch((err) => {
-            console.log("User creation error: ", err);
+            DEBUG && console.log("User creation error: ", err);
             return res.redirect(constants.failed_page);
         });
 });
@@ -290,11 +291,11 @@ app.get('/user-deny', function(req, res, next) {
 
     return dataStore.deregister(user)
         .then(() => {
-            console.log("Account approved:", user);
+            DEBUG && console.log("Account approved:", user);
             return res.redirect(constants.success_page);
         })
         .catch((err) => {
-            console.log("User creation error: ", err);
+            DEBUG && console.log("User creation error: ", err);
             return res.redirect(constants.failed_page);
         });
 });
@@ -310,11 +311,22 @@ app.get('/approval-list', function(req, res, next) {
         });
 });
 
+app.get('/user-list', function(req, res, next) {
+
+    return dataStore.get_user_list()
+        .then((list) => {
+            return res.json(list);
+        })
+        .catch((err) => {
+            return res.redirect(constants.failed_page);
+        });
+});
+
 // supers
 app.use(function(req, res, next) {
     let loc_session = req.session;
-    if (loc_session.userid && loc_session.permission > constants.permission.super) {
-        console.log("Super ", loc_session.userid);
+    if (loc_session.userid && loc_session.permission >= constants.permission.super) {
+        DEBUG && console.log("Super ", loc_session.userid);
         return next();
     }
     return res.redirect(constants.denied_page);
@@ -335,8 +347,15 @@ app.patch('/user-delete', function(req, res, next) {
 app.use(function(req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid && loc_session.permission == constants.permission.max) {
-        console.log("God? ", loc_session.userid);
+        DEBUG && console.log("God? ", loc_session.userid);
         return next();
     }
     return res.redirect(constants.denied_page);
+});
+
+app.put('/debug', function(req, res, next) {
+    DEBUG = req.body.debug;
+
+    console.log("Debug set to ", DEBUG);
+    return res.redirect(constants.success_page);
 });

@@ -43,7 +43,13 @@ let api = (function() {
 
     module.getApprovalList = function(listener) {
         send('GET', '/approval-list', {}, function(err, res) {
-            listener(res, err ? true: false);
+            listener(res, err ? true : false);
+        });
+    };
+
+    module.getUsersList = function(listener) {
+        send('GET', '/user-list', {}, function(err, res) {
+            listener(res, err ? true : false);
         });
     };
 
