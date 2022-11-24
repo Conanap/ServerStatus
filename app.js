@@ -50,7 +50,7 @@ app.use(session({ secret: String(crypto.randomBytes(32)),
 
 // for logging
 app.use(function(req, res, next) {
-    console.log(req.method, req.originalUrl, req.body);
+    // console.log(req.method, req.originalUrl, req.body);
     return next();
 });
 
@@ -68,13 +68,31 @@ app.get('/login', function (req, res, next) {
     return res.redirect("/login.html");
 });
 
+app.post('/user-create', function(req, res, next) {
+    let user = {
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+    };
+
+    return dataStore.register(user)
+        .then(() => {
+            console.log("User created: ", user);
+            return res.redirect(constants.user_reqd_page);
+        })
+        .catch((err) => {
+            console.log("User creation error: ", err);
+            return res.redirect(constants.failed_page);
+        });
+});
+
 app.post('/user-login', function(req, res, next) {
     let user = {
         ident: req.body.ident,
         password: req.body.password,
     }
 
-    console.log("Trying to login", user);
+    console.log("Trying to login", user.ident);
     return dataStore.login(user)
     .then(function(result) {
         if(result.success) {
@@ -89,7 +107,7 @@ app.post('/user-login', function(req, res, next) {
         }
 
         // redirect to sign up later
-        return res.status(401).redirect('permissiondenied.html');
+        return res.status(401).redirect(constants.denied_page);
     });
     
 });
@@ -101,7 +119,7 @@ app.use(function(req, res, next) {
         console.log("User ", loc_session.userid);
         return next();
     }
-    return res.redirect('/permissiondenied.html');
+    return res.redirect(constants.denied_page);
 });
 
 app.use(express.static('static'));
@@ -197,27 +215,7 @@ app.use(function(req, res, next) {
         console.log("GM ", loc_session.userid);
         return next();
     }
-    return res.redirect('permissiondenied.html');
-});
-
-app.patch('/permission-set', function(req, res, next) {
-    let user = {
-        username: req.body.username,
-        permission: req.body.permission,
-    }
-
-    if (user.permission >= req.session.permission)
-        return res.redirect("permissiondenied.html");
-
-    return dataStore.set_permission(user.username, user.permission)
-        .then(() => {
-            console.log("Permission set:", user);
-            return res.redirect('/actionsucceed.html');
-        })
-        .catch((err) => {
-            console.log("User creation error: ", err);
-            return res.redirect('/actionfailed.html');
-        });
+    return res.redirect(constants.denied_page);
 });
 
 // server announcement
@@ -250,24 +248,40 @@ app.use(function(req, res, next) {
         console.log("Admin ", loc_session.userid);
         return next();
     }
-    return res.redirect('permissiondenied.html');
+    return res.redirect(constants.denied_page);
 });
 
-app.patch('/user-create', function(req, res, next) {
+app.patch('/permission-set', function(req, res, next) {
     let user = {
         username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-    };
+        permission: req.body.permission,
+    }
 
-    return dataStore.register(user)
+    if (user.permission >= req.session.permission)
+        return res.redirect(constants.denied_page);
+
+    return dataStore.set_permission(user.username, user.permission)
         .then(() => {
-            console.log("User created: ", user);
-            return res.redirect('/actionsucceed.html');
+            console.log("Permission set:", user);
+            return res.redirect(constants.success_page);
         })
         .catch((err) => {
             console.log("User creation error: ", err);
-            return res.redirect('/actionfailed.html');
+            return res.redirect(constants.failed_page);
+        });
+});
+
+app.patch('/user-approve', function(req, res, next) {
+    let user = req.body.username;
+
+    return dataStore.set_permission(user.username, constants.permission.min)
+        .then(() => {
+            console.log("Account approved:", user);
+            return res.redirect(constants.success_page);
+        })
+        .catch((err) => {
+            console.log("User creation error: ", err);
+            return res.redirect(constants.failed_page);
         });
 });
 
@@ -279,7 +293,18 @@ app.use(function(req, res, next) {
         console.log("Super ", loc_session.userid);
         return next();
     }
-    return res.redirect('permissiondenied.html');
+    return res.redirect(constants.denied_page);
+});
+
+app.patch('/user-delete', function(req, res, next) {
+    let user = req.body.ident;
+
+    return dataStore.deregister(user)
+    .then((success) => {
+        if (success)
+            return res.redirect('actionsucceed.html');
+        return res.redirect(constants.failed_page);
+    });
 });
 
 // god
@@ -289,5 +314,5 @@ app.use(function(req, res, next) {
         console.log("God? ", loc_session.userid);
         return next();
     }
-    return res.redirect('permissiondenied.html');
+    return res.redirect(constants.denied_page);
 });

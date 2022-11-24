@@ -25,7 +25,7 @@ async function register(data) {
        data.password = hash;
        data.attempts = 0;
        data.attemptTimestamp = 0;
-       data.permission = constants.permission.min;
+       data.permission = constants.permission.pending;
 
         return db(USERDATADB).insert(data);
     })
@@ -42,6 +42,20 @@ async function register(data) {
             message: "User creation failed."
         };
     });
+};
+
+async function deregister(ident) {
+    return db(USERDATADB)
+        .where({ username: ident })
+        .orWhere({ email: ident })
+        .delete()
+        .then(() => {
+            return true;
+        })
+        .catch((err) => {
+            console.log("Error deleting user ", ident, ": ", err);
+            return false;
+        });
 };
 
 async function login(user) {
@@ -62,12 +76,16 @@ async function login(user) {
 
         return {
             data: data,
-            success: bcrypt.compare(user.password, data[0].password),
+            success: data[0].permission && bcrypt.compare(user.password, data[0].password),
         };
     })
     .then((result) => {
         let data = result.data;
         let auth_res = result.success;
+
+        // check for pending approval
+        if (!data[0].permission)
+            return {data: undefined, success: false};
 
         data[0].attempts = result ? 0 : data[0].attempts + 1;
         data[0].attemptTimestamp = Date.now();
@@ -105,4 +123,9 @@ async function set_permission(username, permission_level) {
 
 };
 
-module.exports = { register: register, login: login, set_permission: set_permission };
+module.exports = {
+    register: register,
+    login: login,
+    set_permission: set_permission,
+    deregister: deregister,
+};
