@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Conanp - User Creation</title>
+    <link href="style/css/login.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+    <div class="content">
+    <header>
+        <h1>User Creation</h1>
+    </header>
+
+    <form action="/user-create" method="POST">
+        <fieldset>
+            <label>Username</label><br>
+            <input type="text" name="username" id="username" required>
+            <br><br>
+
+            <label>Email</label><br>
+            <input type="email" name="email" id="email" required>
+            <br><br>
+
+            <label>Password</label><br>
+            <input type="password" id="password" name="password" required>
+
+            <br><br>
+            <a href="/index.html">Cancel</a>
+            <button type="submit">Submit</button>
+            <br><br>
+        </fieldset>
+    </form>
+    </div>
+</body>
+
+</html>

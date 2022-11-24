@@ -3,9 +3,21 @@
     <head>
         <meta charset="utf-8"/>
         <title>Conanap Server Status</title>
-        <link href="style/index.css" rel="stylesheet" type="text/css"/>
+        <link href="public/style/css/index.css" rel="stylesheet" type="text/css"/>
     </head>
     <body>
+        <div class="content">
+
+        <input type="checkbox" id="checkbox1" class="checkbox1 visuallyHidden">
+        <label for="checkbox1">
+            <div class="hamburger hamburger1">
+                <span class="bar bar1"></span>
+                <span class="bar bar2"></span>
+                <span class="bar bar3"></span>
+                <span class="bar bar4"></span>
+            </div>
+        </label>
+
         <p id="curTime">Server error</p>
         <br>
         <br>
@@ -34,12 +46,13 @@
     <div id="PA" class="tableDiv">
 
     </div>
-    
     </div>
-    </body>
+    </div>
 
     <footer>
+        <a href="createuser.html">Create a new user</a>
         <script src="js/api.js"></script>
         <script src="js/index.js"></script>
     </footer>
+    </body>
 </html>
