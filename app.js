@@ -271,10 +271,10 @@ app.patch('/permission-set', function(req, res, next) {
         });
 });
 
-app.patch('/user-approve', function(req, res, next) {
-    let user = req.body.username;
+app.get('/user-approve', function(req, res, next) {
+    let user = req.query.user;
 
-    return dataStore.set_permission(user.username, constants.permission.min)
+    return dataStore.set_permission(user, constants.permission.min)
         .then(() => {
             console.log("Account approved:", user);
             return res.redirect(constants.success_page);
@@ -285,6 +285,30 @@ app.patch('/user-approve', function(req, res, next) {
         });
 });
 
+app.get('/user-deny', function(req, res, next) {
+    let user = req.query.user;
+
+    return dataStore.deregister(user)
+        .then(() => {
+            console.log("Account approved:", user);
+            return res.redirect(constants.success_page);
+        })
+        .catch((err) => {
+            console.log("User creation error: ", err);
+            return res.redirect(constants.failed_page);
+        });
+});
+
+app.get('/approval-list', function(req, res, next) {
+
+    return dataStore.get_awiting_approval()
+        .then((list) => {
+            return res.json(list);
+        })
+        .catch((err) => {
+            return res.redirect(constants.failed_page);
+        });
+});
 
 // supers
 app.use(function(req, res, next) {

@@ -37,10 +37,7 @@ async function register(data) {
     })
     .catch((err) => {
         console.error("User creation failed for ", data.username, ":", err);
-        return {
-            status: 500,
-            message: "User creation failed."
-        };
+        throw err;
     });
 };
 
@@ -52,6 +49,16 @@ async function deregister(ident) {
         .then(() => {
             return true;
         })
+        .catch((err) => {
+            console.log("Error deleting user ", ident, ": ", err);
+            throw err;
+        });
+};
+
+async function get_awiting_approval() {
+    return db(USERDATADB)
+        .where({ permission: constants.permission.pending })
+        .select()
         .catch((err) => {
             console.log("Error deleting user ", ident, ": ", err);
             return false;
@@ -118,7 +125,7 @@ async function set_permission(username, permission_level) {
         })
         .catch((err) => {
             console.log("Cannot set permission level for ", username, " to ", permission_level);
-            return false;
+            throw err;
         });
 
 };
@@ -128,4 +135,5 @@ module.exports = {
     login: login,
     set_permission: set_permission,
     deregister: deregister,
+    get_awiting_approval: get_awiting_approval,
 };

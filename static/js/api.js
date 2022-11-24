@@ -41,5 +41,11 @@ let api = (function() {
         });
     };
 
+    module.getApprovalList = function(listener) {
+        send('GET', '/approval-list', {}, function(err, res) {
+            listener(res, err ? true: false);
+        });
+    };
+
     return module;
 }());
