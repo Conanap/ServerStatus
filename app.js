@@ -188,14 +188,36 @@ https.createServer(cred, app).listen(httpsPort, function(err) {
     else console.log('HTTPS Server running on ', httpsPort);
 });
 
-// ADMIN ONLY
+// extra perms required
+
+// gm
 app.use(function(req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid && loc_session.permission > constants.permission.gm) {
-        console.log("User ", loc_session.userid);
+        console.log("GM ", loc_session.userid);
         return next();
     }
     return res.redirect('permissiondenied.html');
+});
+
+app.patch('/permission-set', function(req, res, next) {
+    let user = {
+        username: req.body.username,
+        permission: req.body.permission,
+    }
+
+    if (user.permission >= req.session.permission)
+        return res.redirect("permissiondenied.html");
+
+    return dataStore.set_permission(user.username, user.permission)
+        .then(() => {
+            console.log("Permission set:", user);
+            return res.redirect('/actionsucceed.html');
+        })
+        .catch((err) => {
+            console.log("User creation error: ", err);
+            return res.redirect('/actionfailed.html');
+        });
 });
 
 // server announcement
@@ -221,10 +243,11 @@ app.patch('/pa', function(req, res, next) {
     return res.status(200).end("PA successfully posted");
 });
 
+// admins
 app.use(function(req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid && loc_session.permission > constants.permission.admin) {
-        console.log("User ", loc_session.userid);
+        console.log("Admin ", loc_session.userid);
         return next();
     }
     return res.redirect('permissiondenied.html');
@@ -248,31 +271,23 @@ app.patch('/user-create', function(req, res, next) {
         });
 });
 
+
+// supers
 app.use(function(req, res, next) {
     let loc_session = req.session;
     if (loc_session.userid && loc_session.permission > constants.permission.super) {
-        console.log("User ", loc_session.userid);
+        console.log("Super ", loc_session.userid);
         return next();
     }
     return res.redirect('permissiondenied.html');
 });
 
-app.patch('/permission-set', function(req, res, next) {
-    let user = {
-        username: req.body.username,
-        permission: req.body.permission,
+// god
+app.use(function(req, res, next) {
+    let loc_session = req.session;
+    if (loc_session.userid && loc_session.permission == constants.permission.max) {
+        console.log("God? ", loc_session.userid);
+        return next();
     }
-
-    if (user.permission >= user.super)
-        return res.redirect("permissiondenied.html");
-
-    return dataStore.set_permission(user.username, user.permission)
-        .then(() => {
-            console.log("Permission set:", user);
-            return res.redirect('/actionsucceed.html');
-        })
-        .catch((err) => {
-            console.log("User creation error: ", err);
-            return res.redirect('/actionfailed.html');
-        });
-})
+    return res.redirect('permissiondenied.html');
+});
