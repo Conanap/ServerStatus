@@ -9,6 +9,10 @@ const cookie = require('cookie');
 
 const fs = require('fs');
 const exec = require('child_process').exec;
+const spawn = require('child_process').spawn;
+const mcstatus = require('minestat');
+// Use following until minestat updates the npm package with the fix.
+// const mcstatus = require('./data/stores/minestat');
 
 const dataStore = require('./data/data');
 const constants = require('./const.js');
@@ -32,6 +36,7 @@ const redir = express();
 */
 let msgs = {};
 let id = 0;
+
 
 redir.use(function(req, res, next) {
     res.writeHead(301, { "Location": "https://conanap.me" });
@@ -149,10 +154,8 @@ app.get('/statuses', function(req, res, next) {
 });
 
 app.get('/statuses/mc', function(req, res, next) {
-    exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
-
-        return res.json(stdout.indexOf('java.exe') >= 0 ? "Online" : "Offline");
+    return mcstatus.init('localhost', 25565, function(result) {
+        return res.json(mcstatus.online ? "Online" : "Offline");
     });
 });
 
@@ -160,6 +163,26 @@ app.get('/statuses/plex', function(req, res, next) {
     exec('tasklist.exe', function(err, stdout, stderr) {
         if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
         return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
+    });
+});
+
+// extra perms required
+
+// Trusted User
+app.use(function(req, res, next) {
+    let loc_session = req.session;
+    if (loc_session.userid && loc_session.permission >= constants.permission.trusted) {
+        DEBUG && console.log("Trusted user ", loc_session.userid);
+        return next();
+    }
+    return res.redirect(constants.denied_page);
+});
+
+app.get('/IP', function(req, res, next) {
+    send('GET', 'https://api.ipify.org?format=json', {}, function(err, res) {
+        if(err)
+            return err;
+        return res.json(res.ip);
     });
 });
 
@@ -182,32 +205,12 @@ app.get('/LocIP', async function(req, res, next) {
             return text;
         })
         .catch((err) => {
-            console.error('Error fetching Public IP:', error);
+            console.error('Error fetching Public IP:', err);
             return "Error fetching public IP";
         });
 
         return res.json(text);
 });
-
-app.get('/IP', function(req, res, next) {
-    send('GET', 'https://api.ipify.org?format=json', {}, function(err, res) {
-        if(err)
-            return err;
-        return res.json(res.ip);
-    });
-});
-
-
-http.createServer(redir).listen(httpPort, function(err) {
-    if(err) console.log(err);
-    else console.log('HTTP Server running on ', httpPort);
-});
-https.createServer(cred, app).listen(httpsPort, function(err) {
-    if(err) console.log(err);
-    else console.log('HTTPS Server running on ', httpsPort);
-});
-
-// extra perms required
 
 // gm
 app.use(function(req, res, next) {
@@ -322,6 +325,33 @@ app.get('/user-list', function(req, res, next) {
         });
 });
 
+app.post('/mc-restart', function(req, res, next) {
+    let server_name = req.params.name;
+
+    if (!dataStore.is_minecraft_server(server_name)) {
+        return res.status(404).send("No such server" + server_name);
+    }
+
+    console.log("Restarting " + server_name);
+    let server = dataStore.get_minecraft_process(server_name);
+    let timestamp = dataStore.get_minecraft_process_timestamp(server_name);
+    let should_spawn = Date.now() - timestamp > constants.mc_timeout;
+
+    if(!should_spawn) {
+        return res.status(425).send("Must wait 3 minutes from " + timestamp + "before re-trying");
+    }
+
+    console.log("Restarting " + server_name);
+    if(server) {
+        server.kill();
+    }
+
+    server = spawn(constants.mcscript[server_name]);
+    timestamp = Date.now();
+
+    return res.status(200).send(timestamp);
+});
+
 // supers
 app.use(function(req, res, next) {
     let loc_session = req.session;
@@ -358,4 +388,13 @@ app.put('/debug', function(req, res, next) {
 
     console.log("Debug set to ", DEBUG);
     return res.redirect(constants.success_page);
+});
+
+http.createServer(redir).listen(httpPort, function(err) {
+    if(err) console.log(err);
+    else console.log('HTTP Server running on ', httpPort);
+});
+https.createServer(cred, app).listen(httpsPort, function(err) {
+    if(err) console.log(err);
+    else console.log('HTTPS Server running on ', httpsPort);
 });

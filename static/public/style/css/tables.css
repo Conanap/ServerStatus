@@ -1,1 +1,1 @@
-html body table{margin:0;padding:0;table-layout:fixed;width:100%}html body table tr:nth-child(1){background:brown}html body table tr:nth-child(even){background:#161573}
+html body table{margin:0;padding:0;table-layout:fixed;width:100%}html body table tr:nth-child(odd){background:#161573}html body table tr:nth-child(1){background:#952626}html body table tr:nth-child(1) th{padding:1em}html body table tr td{padding:.75em}html body table tr td form{margin-top:1em;margin-bottom:0em;padding:0em}

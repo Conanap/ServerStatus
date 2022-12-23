@@ -6,6 +6,7 @@
         <link href="public/style/css/index.css" rel="stylesheet" type="text/css"/>
         <link href="public/style/css/tables.css" rel="stylesheet" type="text/css"/>
     </head>
+
     <body>
         <div class="topbar">
             <a href="/tools.html">Tools</a>
@@ -19,29 +20,37 @@
         <p id="pubIP">Unable to get public IP</p>
 
         <div class="tableDiv">
-        <table>
+                <table>
 
-        <tr>
-            <th>Service</th>
-            <th>Status</th>
-        </tr>
+                    <tr>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
 
-        <tr>
-            <td><p>Plex Media Server</p></td>
-            <td><p id="plex" class="off">Unknown</p></td>
-        </tr>
+                    <tr>
+                        <td><p>Plex Media Server</p></td>
+                        <td><p id="plex" class="off">Unknown</p></td>
+                        <td><button id="plex-button">Restart</button></td>
+                    </tr>
 
-        <tr>
-                <td><p>Minecraft</p></td>
-                <td><p id="mc" class="off">Unknown</p></td>
-            </tr>
-    </table>
+                    <tr>
+                        <td><p>Minecraft (Victor)</p></td>
+                        <td><p id="mc" class="off">Unknown</p></td>
+                        <td>
+                            <form method="post">
+                                <button id="mc-restart" formaction="/mc-restart?name=victor">Restart</button>
+                            </form><br>
+                            <a href="/mc-whitelist">Add to whitelist</a>
+                        </td>
+                    </tr>
+                </table>
 
-    <br><br>
-    <div id="PA" class="tableDiv">
+            <br><br>
 
-    </div>
-    </div>
+            <div id="PA" class="tableDiv"></div>
+
+        </div>
     </div>
 
     <footer>

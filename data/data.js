@@ -14,6 +14,46 @@ const db = knex({
 });
 
 const USERDATADB = 'user';
+/*
+User Schema:
+{
+    username: text,
+    email: text,
+    password: text (salted, hashed),
+    attempts: int,
+    attemptTimestamp: int,
+    permission: int,
+}
+*/
+
+const PADB = 'pa';
+/*
+PA Schema:
+{
+    id: int,
+    msg: text,
+    expire: int (timestamp),
+}
+*/
+
+/*
+MC Process schema:
+mcserver: {
+    <server name>: {
+        process: <process obj>,
+        timestamp: <timestamp> // default = 0
+    },
+    ...
+}
+*/
+let processes = {
+    mcserver: {
+        victor: {
+            process: undefined,
+            timestamp: 0,
+        },
+    }
+};
 
 async function register(data) {
     if (!data.username || !data.email || !data.password)
@@ -130,9 +170,10 @@ async function set_permission(username, permission_level) {
         .orWhere({ email: username })
         .select('permission')
         .then((perm) => {
-            if(perm === constants.permission.max)
+            if(perm === constants.permission.max) {
                 console.log("Cannot change max permission to other permissions.");
                 throw "Cannot change max permission to other permissions.";
+            }
             
             return db(USERDATADB)
             .where({ username: username })
@@ -150,6 +191,23 @@ async function set_permission(username, permission_level) {
 
 };
 
+async function is_minecraft_server(server_name) {
+    return server_name != undefined && server_name in processes.mcserver;
+};
+
+async function get_minecraft_process(server_name) {
+    return processes.mcserver[server_name].process;
+};
+
+async function get_minecraft_process_timestamp(server_name) {
+    return processes.mcserver[server_name].timestamp;
+};
+
+async function set_minecraft_process_and_timestamp(server_name, process, timestamp) {
+    processes.mcserver[server_name].process = process;
+    processes.mcserver[server_name].timestamp = timestamp;
+};
+
 module.exports = {
     register: register,
     login: login,
@@ -157,4 +215,8 @@ module.exports = {
     deregister: deregister,
     get_awiting_approval: get_awiting_approval,
     get_user_list: get_user_list,
+    get_minecraft_process, get_minecraft_process,
+    get_minecraft_process_timestamp: get_minecraft_process_timestamp,
+    is_minecraft_server: is_minecraft_server,
+    set_minecraft_process_and_timestamp: set_minecraft_process_and_timestamp,
 };
