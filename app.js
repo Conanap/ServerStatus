@@ -34,8 +34,8 @@ const key = fs.readFileSync(config.security.key, 'utf8');
 const cert = fs.readFileSync(config.security.cert, 'utf8');
 const cred = { key: key, cert: cert };
 
-const httpPort = 80;
-const httpsPort = 443;
+const httpPort = config.app.http;
+const httpsPort = config.app.https;
 const DEBUG = false;
 
 const app = express();
