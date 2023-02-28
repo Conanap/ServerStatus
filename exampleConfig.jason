@@ -1,6 +1,12 @@
 {
-    "security": {
-        "key": "I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.key",
-        "cert": "I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.crt"
-    }
+	"security": {
+		"key": "/home/conanap/Documents/web.key",
+		"cert": "/home/conanap/Documents/web.crt"
+	},
+	"servers": {
+		"plex": {
+			"host": "192.168.1.1",
+			"port": 32400
+		}
+	}
 }
