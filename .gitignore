@@ -62,3 +62,4 @@ typings/
 
 data/stores/
 .vscode/
+config.json
