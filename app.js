@@ -10,6 +10,8 @@ const cookie = require('cookie');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const spawn = require('child_process').spawn;
+
+const ping = require('ping-tcp-js');
 const mcstatus = require('minestat');
 // Use following until minestat updates the npm package with the fix.
 // const mcstatus = require('./data/stores/minestat');
@@ -160,10 +162,19 @@ app.get('/statuses/mc', function(req, res, next) {
 });
 
 app.get('/statuses/plex', function(req, res, next) {
-    exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
-        return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
+    ping.ping('localhost', 32400)
+    .then(() => {
+        DEBUG && console.log("Plex online");
+        return res.json("Online");
+    })
+    .catch((e) => {
+        console.error("Error pinging plex: ", e);
+        return res.json("Offline");
     });
+    // exec('tasklist.exe', function(err, stdout, stderr) {
+    //     if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
+    //     return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
+    // });
 });
 
 // extra perms required
