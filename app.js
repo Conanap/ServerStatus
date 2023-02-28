@@ -173,7 +173,7 @@ app.get('/statuses/mc', function(req, res, next) {
 });
 
 app.get('/statuses/plex', function(req, res, next) {
-    ping.ping('localhost', 32400)
+    ping.ping(config.servers.plex.host, config.servers.plex.port)
     .then(() => {
         DEBUG && console.log("Plex online");
         return res.json("Online");
@@ -182,10 +182,6 @@ app.get('/statuses/plex', function(req, res, next) {
         console.error("Error pinging plex: ", e);
         return res.json("Offline");
     });
-    // exec('tasklist.exe', function(err, stdout, stderr) {
-    //     if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
-    //     return res.json(stdout.indexOf('Plex Media Server.exe') >= 0 ? "Online" : "Offline");
-    // });
 });
 
 // extra perms required
