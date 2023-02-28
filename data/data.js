@@ -1,13 +1,11 @@
 const bcrypt = require('bcrypt')
 const knex = require('knex');
-const constants = require('../const.js');
+const constants = require('../js/const.js');
 
 const db = knex({
     client: 'better-sqlite3',
     connection: {
-        // for some reason it's from project root lol
-        // well I guess it's from the executing file, so app.js
-        // but __dirnamegoes to this file's loc, so /data
+        // but __dirname goes to this file's loc, so /data
         filename: __dirname + '/stores/localdb.db'
     },
     useNullAsDefault: true

@@ -1,0 +1,6 @@
+{
+    "security": {
+        "key": "I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.key",
+        "cert": "I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.crt"
+    }
+}

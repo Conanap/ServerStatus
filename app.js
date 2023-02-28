@@ -17,10 +17,21 @@ const mcstatus = require('minestat');
 // const mcstatus = require('./data/stores/minestat');
 
 const dataStore = require('./data/data');
-const constants = require('./const.js');
+const constants = require('./js/const.js');
 
-const key = fs.readFileSync('I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.key', 'utf8');
-const cert = fs.readFileSync('I:/Documents/homeServer/DDNS/SSLCerts/Exp-2035-oct-18/basic.crt', 'utf8');
+// scuffy solution but works I guess
+try {
+    require('./config.json');
+} catch (e) {
+    console.log("Error: Please set up a local config file at <project root>/config.json.");
+    console.log("See exampleConfig.json for what to set up.");
+    throw e;
+}
+
+const config = require('./config.json');
+
+const key = fs.readFileSync(config.security.key, 'utf8');
+const cert = fs.readFileSync(config.security.cert, 'utf8');
 const cred = { key: key, cert: cert };
 
 const httpPort = 80;
