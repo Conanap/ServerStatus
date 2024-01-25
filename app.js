@@ -263,26 +263,26 @@ app.use(function(req, res, next) {
 });
 
 // server announcement
-app.patch('/pa', function(req, res, next) {
-    let time = Date.parse(req.body.time);
+app.post('/pa', function(req, res, next) {
+    let time = Date.parse(req.body.expires);
     let currTime = Date.now();
     if(!time || time < currTime)
-        return res.status(400)
-        .end('Invalid time; use structure "yyyy-mm-ttThh:mm:ssZ", where T and Z are literals.');
+        return res.redirect(constants.failed_page);
 
-    let text = req.body.text;
-    if(!text) return res.status(400).end('Invalid message');
+    let text = req.body.patext;
+    if(!text) return res.redirect(constants.failed_page);
 
     let cid = id++;
     msgs[cid] = {
         text: text,
-        expiry: time
+        expiry: time,
+        id: cid
     };
 
     setTimeout(function() {
         delete msgs[cid];
     }, time - currTime);
-    return res.status(200).end("PA successfully posted");
+    return res.redirect(constants.success_page);
 });
 
 // admins

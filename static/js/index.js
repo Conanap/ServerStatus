@@ -120,6 +120,7 @@ const DELAY = 10000;
             let html = `
             <table>
                 <tr>
+                    <th>Message ID</th>
                     <th>Message</th>
                     <th>Expiry Time</th>
                 </tr>
@@ -127,10 +128,11 @@ const DELAY = 10000;
 
             // ele.innerHTML = msgs;
             for(var msg in msgs) {
-                html += "<tr><td>" + msgs[msg]["text"] + "</td>";
+                html += "<tr><td>" + msgs[msg]["id"] + "</td>";
+                html += "<td>" + msgs[msg]["text"] + "</td>";
                 let date = new Date(msgs[msg]["expiry"]);
                 date = date.toUTCString().slice(0, -3) + "UTC";
-                html += "<td>" + date + "</td><tr>";
+                html += "<td>" + date + "</td></tr>";
             }
             html += "</table>";
             ele.innerHTML = html;

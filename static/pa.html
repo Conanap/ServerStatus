@@ -16,19 +16,19 @@
         <table>
 
         <tr>
-            <th><a href="/changepermission.html">Change user permissions</a></th>
+            <th>Entre PA to publish.</th>
         </tr>
         <tr>
-            <th><a href="/pa.html">Create New Public Announcement</a></th>
-        </tr>
-        <tr>
-            <th><a href="/approveuser.html">New user approval</a></th>
-        </tr>
-        <tr>
-            <th><a href="/userlist.html">User list</a></th>
-        </tr>
-        <tr>
-            <th><a href="/qrtest.html">QR Test</a></th>
+            <th><form action="/pa" method="POST" id="paform">
+                <fieldset>
+                    <textarea name="patext" id="patext"></textarea>
+                    <br><br>
+                    <input type="datetime-local" name="expires" id="expires">
+                    <br><br>
+                    <a href="/">Cancel  </a>
+                    <button type=""submit">Submit</button>
+                </fieldset>
+            </form></th>
         </tr>
     </table>
 
