@@ -39,44 +39,66 @@ const DELAY = 10000;
         setTimeout(updateTime, 1000);
     };
 
-    // server statuses
-    function updateMC() {
-        console.log("Checking MC");
-        api.mcStatus(function(status, err) {
-            var ele = document.querySelector('#mc');
+    function drawTable() {
+        console.log("Getting table");
+        api.getTable(function(tableStr, err) {
+            var ele = document.querySelector("#actTable");
+            if (err) {
+                return;
+            }
+
+            ele.innerHTML = tableStr;
+        });
+    };
+
+    function updateStatusWithType(apiFunc, type, tag, port = undefined) {
+        apiFunc(type, port, function(status, err) {
+            var ele = document.querySelector('#' + tag);
             if(err) {
                 ele.innerHTML = 'Unknown';
                 ele.className = 'off';
                 return;
             }
-
+            if(!ele) {
+                console.log("No such element: " + tag + " for type " + type);
+            }
+    
             ele.innerHTML = status;
             if(status == 'Online')
                 ele.className = "on";
             else
                 ele.className = 'off';
-
         });
-        setTimeout(updateMC, DELAY);
+    };
+
+    // server statuses
+    function updateServers(servers) {
+        console.log("Checking servers");
+
+        servers.forEach(ele => {
+            updateStatusWithType(api.getGenericServerStatus, ele.type, ele.tag, ele.port);
+        });
+
+
+        setTimeout(function() { updateServers(servers) }, DELAY);
+    };
+
+    function setServers() {
+        api.getServers(function(serverList, err) {
+            if (err) {
+                console.log('Servers not set.');
+                return;
+            }
+            console.log('Servers set.');
+
+            updatePlex();
+            updateServers(serverList);
+        });
     };
 
     function updatePlex() {
         console.log("Checking Plex");
-        api.plexStatus(function(status, err) {
-            var ele = document.querySelector('#plex');
-            if(err) {
-                ele.innerHTML = 'Unknown';
-                ele.className = 'off';
-                return;
-            }
-
-            ele.innerHTML = status;
-            if(status == 'Online')
-                ele.className = "on";
-            else
-                ele.className = 'off';
-
-        });
+        updateStatusWithType(api.getGenericServerStatus, 'plex', 'plex');
         setTimeout(updatePlex, DELAY);
     };
 
@@ -132,9 +154,9 @@ const DELAY = 10000;
         setTimeout(updatePublicIP, DELAY);
     };
 
+    drawTable();
+    setServers();
     updateTime();
-    updateMC();
-    updatePlex();
     updatePA();
     updatePublicIP();
 }());

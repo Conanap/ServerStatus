@@ -17,15 +17,9 @@ let api = (function() {
 
     let module = {};
 
-    module.mcStatus = function (listener) {
-        send('GET', '/statuses/mc', {}, function(err, res) {
-            listener(res, err ? true : false);
-        });
-    };
-
-    module.plexStatus = function(listener) {
-        send('GET', '/statuses/plex', {}, function(err, res) {
-            listener(res, err ? true : false);
+    module.getTable = function(listener) {
+        send('GET', '/statuses/table', {}, function(err, res) {
+            listener(res, err ? true: false);
         });
     };
 
@@ -51,6 +45,22 @@ let api = (function() {
         send('GET', '/user-list', {}, function(err, res) {
             listener(res, err ? true : false);
         });
+    };
+
+    module.getServers = function(listener) {
+        send('GET', '/server-list', {}, function(err, res) {
+            listener(res, err ? true : false);
+        })
+    };
+
+    module.getGenericServerStatus = function(type, port, listener) {
+        let url = type;
+        if(port != null) {
+            url += '?port=' + port;
+        }
+        send('GET', '/statuses/' + url, {}, function(err, res) {
+            listener(res, err ? true : false);
+        })
     };
 
     return module;

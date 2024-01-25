@@ -18,13 +18,14 @@ const mcstatus = require('minestat');
 
 const dataStore = require('./data/data');
 const constants = require('./js/const.js');
+const tableBuilder = require('./js/tableBuilder.js');
 
 // scuffy solution but works I guess
 try {
     require('./config.json');
 } catch (e) {
     console.log("Error: Please set up a local config file at <project root>/config.json.");
-    console.log("See exampleConfig.json for what to set up.");
+    console.log("See example Config.json for what to set up.");
     throw e;
 }
 
@@ -52,7 +53,8 @@ let id = 0;
 
 
 redir.use(function(req, res, next) {
-    res.writeHead(301, { "Location": "https://conanap.me" });
+    res.writeHead(301, { "Location": "https://192.168.2.11:92" });
+    // res.writeHead(301, { "Location": "https://conanap.me" });
     res.end();
 });
 
@@ -167,9 +169,15 @@ app.get('/statuses', function(req, res, next) {
 });
 
 app.get('/statuses/mc', function(req, res, next) {
-    return mcstatus.init('localhost', 25565, function(result) {
+    let port = req.query.port;
+    return mcstatus.init('localhost', port, function(result) {
         return res.json(mcstatus.online ? "Online" : "Offline");
     });
+});
+
+app.get('/statuses/pw', function(req, res, next) {
+    let port = req.query.port;
+    return res.json("Pending implementation");
 });
 
 app.get('/statuses/plex', function(req, res, next) {
@@ -182,6 +190,20 @@ app.get('/statuses/plex', function(req, res, next) {
         console.error("Error pinging plex: ", e);
         return res.json("Offline");
     });
+});
+
+// get table information
+
+app.get('/statuses/table', function(req, res, next) {
+    let headers = config.tableHeaders;
+    let generics = config.servers.generic;
+    let ret = tableBuilder.build(headers, generics);
+
+    return res.json(ret);
+});
+
+app.get('/server-list', function(req, res, next) {
+    return res.json(config.servers.generic);
 });
 
 // extra perms required
@@ -341,6 +363,34 @@ app.get('/user-list', function(req, res, next) {
         .catch((err) => {
             return res.redirect(constants.failed_page);
         });
+});
+
+app.post('/service-restart', function(req, res, next) {
+    let server_name = req.params.name;
+    let service_name = req.params.service;
+
+    if (!dataStore.is_server(service_name, server_name)) {
+        return res.status(404).send("No such server" + server_name);
+    }
+
+    console.log("Restarting " + server_name);
+    let server = dataStore.get_minecraft_process(server_name);
+    let timestamp = dataStore.get_minecraft_process_timestamp(server_name);
+    let should_spawn = Date.now() - timestamp > constants.mc_timeout;
+
+    if(!should_spawn) {
+        return res.status(425).send("Must wait 3 minutes from " + timestamp + "before re-trying");
+    }
+
+    console.log("Restarting " + server_name);
+    if(server) {
+        server.kill();
+    }
+
+    server = spawn(constants.mcscript[server_name]);
+    timestamp = Date.now();
+
+    return res.status(200).send(timestamp);
 });
 
 app.post('/mc-restart', function(req, res, next) {

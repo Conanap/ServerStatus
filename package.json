@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.1.1",
     "better-sqlite3": "^8.1.0",
     "body-parser": "^1.20.1",
     "child_process": "^1.0.2",
@@ -15,7 +15,7 @@
     "https": "^1.0.0",
     "knex": "^2.3.0",
     "minestat": "^1.0.4",
-    "ping-tcp-js": "^1.5.0",
+    "ping-tcp-js": "^1.2.0",
     "public-ip": "^6.0.1",
     "pug": "^3.0.2"
   },

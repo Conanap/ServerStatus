@@ -206,6 +206,35 @@ async function set_minecraft_process_and_timestamp(server_name, process, timesta
     processes.mcserver[server_name].timestamp = timestamp;
 };
 
+async function is_server(service_name, server_name) {
+    server_func_map = {
+        "mc": is_minecraft_server
+    };
+
+    return server_func_map[service_name](server_name);
+};
+
+async function get_process(service_name, server_name) {
+    server_func_map = {
+        "mc": get_minecraft_process
+    };
+    return server_func_map[service_name](server_name);
+};
+
+async function get_process_timestamp(service_name, server_name) {
+    server_func_map = {
+        "mc": get_minecraft_process_timestamp
+    };
+    return server_func_map[service_name](server_name);
+};
+
+async function set_process_and_timestamp(service_name, server_name) {
+    server_func_map = {
+        "mc": set_minecraft_process_and_timestamp
+    };
+    return server_func_map[service_name](server_name);
+};
+
 module.exports = {
     register: register,
     login: login,

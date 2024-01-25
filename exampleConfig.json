@@ -1,0 +1,33 @@
+{
+	"security": {
+		"key": "/home/conanap/Documents/web.key",
+		"cert": "/home/conanap/Documents/web.crt"
+	},
+	"app": {
+        "http": 80,
+        "https": 443
+    },
+	"tableHeaders": ["Service", "Status", "Port", "Actions"], // required
+	"servers": {
+		"plex": {
+			"host": "192.168.1.1",
+			"port": 32400
+		},
+        "generic": [
+            {
+                "name": "Palworld",
+                "port": 1234,
+                "process": "pal",
+                "type": "pw",
+                "tag": "pwv"
+            },
+            {
+                "name": "Minecraft",
+                "port": 5678,
+                "process": null,
+                "type": "mc",
+                "tag": "mcv"
+            }
+        ]
+	}
+}
