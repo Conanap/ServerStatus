@@ -8,8 +8,9 @@ const https = require('https');
 const cookie = require('cookie');
 
 const fs = require('fs');
-const exec = require('child_process').exec;
 const spawn = require('child_process').spawn;
+const nmap = require('node-nmap');
+nmap.nmapLocation = "/mnt/c/Program Files (x86)/Nmap/nmap.exe";
 
 const ping = require('ping-tcp-js');
 const mcstatus = require('minestat');
@@ -50,6 +51,7 @@ const redir = express();
 */
 let msgs = {};
 let id = 0;
+let ip = undefined;
 
 
 redir.use(function(req, res, next) {
@@ -162,10 +164,28 @@ app.get('/pa', function(req, res, next) {
 
 // useful shit
 app.get('/statuses', function(req, res, next) {
-    exec('tasklist.exe', function(err, stdout, stderr) {
-        if(err) { DEBUG && console.log(err); DEBUG && console.log(stderr); return err; }
-        return res.json(stdout);
+    if (ip == undefined) {
+        return res.json("Unknown");
+    }
+    let port = req.query.port;
+    let scan = new nmap.NmapScan(ip, ['-p', port]);
+
+    scan.on('complete', function (data) {
+        if(data[0]["openPorts"].length) {
+            DEBUG && console.log("scan result");
+            DEBUG && console.log(data[0]["openPorts"]);
+            return res.json("Online");
+        }
+
+        return res.json("Offline");
+
     });
+
+    scan.on('error', function(err) {
+        console.log(err);
+        return res.json("Unknown");
+    });
+    scan.startScan();
 });
 
 app.get('/statuses/mc', function(req, res, next) {
@@ -220,8 +240,11 @@ app.use(function(req, res, next) {
 
 app.get('/IP', function(req, res, next) {
     send('GET', 'https://api.ipify.org?format=json', {}, function(err, res) {
-        if(err)
+        if(err) {
+            ip = undefined;
             return err;
+        }
+        ip = res.ip;
         return res.json(res.ip);
     });
 });

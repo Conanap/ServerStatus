@@ -54,11 +54,16 @@ let api = (function() {
     };
 
     module.getGenericServerStatus = function(type, port, listener) {
-        let url = type;
+        let url = "";
+        if (type == "plex")
+            url = "/" + type + "?";
+        else
+            url = "?type=" + type + "&";
+
         if(port != null) {
-            url += '?port=' + port;
+            url += 'port=' + port;
         }
-        send('GET', '/statuses/' + url, {}, function(err, res) {
+        send('GET', '/statuses' + url, {}, function(err, res) {
             listener(res, err ? true : false);
         })
     };
