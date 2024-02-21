@@ -10,7 +10,6 @@ const cookie = require('cookie');
 const fs = require('fs');
 const spawn = require('child_process').spawn;
 const nmap = require('node-nmap');
-nmap.nmapLocation = "/mnt/c/Program Files (x86)/Nmap/nmap.exe";
 
 const ping = require('ping-tcp-js');
 const mcstatus = require('minestat');
