@@ -264,10 +264,12 @@ app.get('/LocIP', async function(req, res, next) {
                 return response.text();
             }
         }).then((text) => {
+            ip = text;
             return text;
         })
         .catch((err) => {
             console.error('Error fetching Public IP:', err);
+            ip = undefined;
             return "Error fetching public IP";
         });
 
