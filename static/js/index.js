@@ -130,8 +130,11 @@ const DELAY = 10000;
             for(var msg in msgs) {
                 html += "<tr><td>" + msgs[msg]["id"] + "</td>";
                 html += "<td>" + msgs[msg]["text"] + "</td>";
-                let date = new Date(msgs[msg]["expiry"]);
-                date = date.toUTCString().slice(0, -3) + "UTC";
+                let date = "NA";
+                if (msgs[msg]["expiry"]) {
+                    new Date(msgs[msg]["expiry"]);
+                    date = date.toUTCString().slice(0, -3) + "UTC";
+                }
                 html += "<td>" + date + "</td></tr>";
             }
             html += "</table>";

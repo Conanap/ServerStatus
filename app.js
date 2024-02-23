@@ -158,6 +158,7 @@ app.get('/logout', function(req, res, next) {
 });
 
 app.get('/pa', function(req, res, next) {
+    DEBUG && console.log("Number of PAs at time of request: ", msgs.length);
     return res.json(msgs);
 });
 
@@ -290,7 +291,7 @@ app.use(function(req, res, next) {
 app.post('/pa', function(req, res, next) {
     let time = Date.parse(req.body.expires);
     let currTime = Date.now();
-    if(!time || time < currTime)
+    if(time && time < currTime)
         return res.redirect(constants.failed_page);
 
     let text = req.body.patext;
@@ -303,9 +304,14 @@ app.post('/pa', function(req, res, next) {
         id: cid
     };
 
-    setTimeout(function() {
-        delete msgs[cid];
-    }, time - currTime);
+    console.log("PA " + cid + "posted, expires " + time);
+
+    if(time) {
+        setTimeout(function() {
+            delete msgs[cid];
+        }, time - currTime);
+    }
+
     return res.redirect(constants.success_page);
 });
 
