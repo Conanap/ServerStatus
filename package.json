@@ -5,20 +5,20 @@
   "main": "app.js",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "better-sqlite3": "^8.1.0",
-    "body-parser": "^1.20.1",
+    "better-sqlite3": "^11.1.2",
+    "body-parser": "^1.20.2",
     "child_process": "^1.0.2",
-    "cookie": "^0.4.2",
-    "express": "^4.18.2",
-    "express-session": "^1.17.3",
+    "cookie": "^0.6.0",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
     "http": "^0.0.0",
     "https": "^1.0.0",
-    "knex": "^2.3.0",
-    "minestat": "^1.0.4",
+    "knex": "^3.1.0",
+    "minestat": "^2.0.0",
     "node-nmap": "^4.0.0",
-    "ping-tcp-js": "^1.2.0",
-    "public-ip": "^6.0.1",
-    "pug": "^3.0.2"
+    "ping-tcp-js": "^2.0.4",
+    "public-ip": "^7.0.1",
+    "pug": "^3.0.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
